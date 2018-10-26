@@ -1,0 +1,11 @@
+---
+title: Computing Matching Permutations of Disjoint Stars
+author: Kyle Weingartner
+header-includes:
+    - \usepackage[type={CC},modifier={by-sa},version={3.0}]{doclicense}
+output:
+    pdf_document
+---
+\tableofcontents
+
+\doclicenseThis
