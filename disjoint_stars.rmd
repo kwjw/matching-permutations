@@ -1,11 +1,217 @@
 ---
-title: Computing Matching Permutations of Disjoint Stars
+title: Computing Matching Permutations of Star Forests
 author: Kyle Weingartner
 header-includes:
     - \usepackage[type={CC},modifier={by-sa},version={3.0}]{doclicense}
 output:
     pdf_document
 ---
-\tableofcontents
 
+# Remarks and Initial Code
+
+Disclaimer: the code in this document probably works, but it is liable to be
+ugly, overcomplicated, and/or hard to follow. Improvements and corrections are
+welcome. You can submit an issue or pull request on this project's Github page
+(TODO).
+
+The R code below allows for Python code to be written, executed, and displayed
+within this document, which was compiled using the `rmarkdown` package.
+
+```{r}
+library(reticulate)
+use_virtualenv("r-reticulate")
+py_available(TRUE)
+```
+
+The following Python code defines the packages we need for the rest of the code
+in this document:
+
+```{python}
+import itertools
+from operator import mul
+import functools
+from itertools import product
+```
+
+# Data Structures and Definitions
+
+## Matching Sequences
+
+For this project, matching sequences are represented as Python arrays. It is
+important to note that array indices in Python begin at zero, so the first
+(zeroth) element of the array corresponds to the number of matchings of size
+zero, which is always one. For example, the array `[1, 3, 3, 1]` corresponds to
+the matching sequence with $m_0 = 1$, $m_1 = 3$, $m_2 = 3$, and $m_3 = 1$.
+
+## Matching Permutations
+
+For this project, matching permutations are represented as ordered $n$-tuples in
+Python, following the "one-line notation" discussed in the paper. A (somewhat
+redundant) example: the 5-tuple `(1, 4, 2, 3)` corresponds to the permutation
+1423.
+
+## Star Forests
+
+A star forest (i.e. a graph that is the union of disjoint stars) can be
+uniquely defined by a multiset of integers, with each integer $m$ in the
+multiset corresponding to a star with $m$ edges. For this project, star forests
+are represented as Python arrays. Of course, arrays do not behave like
+multisets, since arrays are indexed. This is not a problem, though, since our
+method of iteration over star forests avoids double counting.
+
+# Converting Matching Sequences to Matching Permutations
+
+A conversion from a matching sequence to its matching permutation should be
+straightforward to program. However, complications arise when a matching
+sequence has multiple associated permutations due to "tiebreaking."
+
+In this section, we will construct a function in Python that converts a
+matching sequence to a *list* of matching permutations.
+
+## Code
+
+```{python}
+# This is a utility function. Given an array (lst) and a particular element of
+# that array (item), this function returns an array that represents the index
+# of that element in the array, or the indices of all occurrences of that
+# element in the array (if it occurs more than once)
+
+def duplicates(lst, item):
+    return [i for i, x in enumerate(lst) if x == item]
+
+# Given a matching sequence (seq), this function returns the list of its
+# associated matching permutation(s).
+
+def gen_perm(seq):
+
+    # This is the array that will store our final result
+    curr = []
+
+    # Duplicate the value of seq in a temporary array, called sub.
+    sub = list(seq)
+
+    # Matching sequences should not have any zeros; if our sequence does,
+    # we assume that we can strip them all out, and the remaining non-zero
+    # terms form the matching sequence (in this program, this shouldn't happen)
+    while 0 in sub:
+        sub.remove(0)
+
+    # Normally, our matching sequence starts with 1; after all, arrays start at
+    # index 0, and m_0 = 1 for all graphs. Since this term has no bearing on
+    # the permutation, we discard it. If the first term is not 1, we assume
+    # that the 1 has already been stripped away, but for this program, it
+    # shouldn't matter.
+    if sub[0] == 1:
+        sub.remove(1)
+
+    # We test to see if all values in the matching sequence are all unique (the
+    # nice case)
+    if len(sub) == len(set(sub)):
+
+        # Duplicate the value of sub in a temporary array, called srt
+        srt = list(sub)
+
+        # Sort the list srt
+        srt.sort()
+
+        # Use the sorted list to create the corresponding permutation
+        perm = []
+        for j in range(0, len(sub)):
+            perm.append(sub.index(srt[j]) + 1)
+
+        # Return a list containing exactly this permutation casted to a tuple
+        return [tuple(perm)]
+
+    # If we make it here, then unfortunately there are duplicate values in the
+    # matching sequence. Luckily, we can take advantage of the fact that
+    # duplicates come only in pairs.
+
+    # We iterate over the matching sequence, calling the 'duplicate' function
+    # to find all occurrences of each element. We discard all elements that
+    # appear only once, and what remains is a dictionary that contains lists of
+    # indices in which repeated elements appear in the matching sequence
+    #
+    # As an example, the sequence [4, 6, 7, 4, 1] would have
+    # 4: [0, 3]
+    #
+    # The sequence [8, 10, 12, 10, 8, 3] would have
+    # 8: [0, 4]
+    # 10: [1, 3]
+    d = dict((x, duplicates(sub, x)) for x in set(sub) if sub.count(x) > 1)
+
+    # s is the set of all len(d)-tuples of the form (+/- 1, +/- 1, ..., +/- 1)
+    s = set(itertools.product((-1, 1), repeat=len(d)))
+
+    # dk is the list of values that are repeated in the matching sequence
+    dk = list(d.keys())
+
+    # We iterate over all of the len(d)-tuples (+/- 1, +/- 1, ... +/- 1)
+    #
+    # As an example, suppose our matching sequence is [8, 10, 12, 10, 8, 3]
+    # as above. Then we iterate over all order pairs of the form
+    # (+- 1, +/- 1).
+    for i in s:
+
+        # Yet again, make a temporary copy of the matching sequence
+        sub1 = []
+        sub1.extend(list(sub))
+
+        # The overall effect of this loop, using the example from above,
+        # and supposing that our current ordered pair in the iteration
+        # is (1, -1):
+        #
+        # The sequence [8, 10, 12, 10, 8, 3] becomes
+        # [8.1, 9.9, 12, 10.1, 7.9, 3], which can now be properly sorted.
+        #
+        # (Keep in mind that every possible "tiebreak" is handled, since
+        # every possible type of perturbation of duplicated values is accounted
+        # for in the outer loop)
+        for j in range(len(d)):
+
+            # Create a small deviation among the duplicated values, so that
+            # they are now distinct (and therefore can be ordered), but the
+            # deviation is small enough that it won't disrupt the ordering of
+            # the sequence as a whole
+            sub1[d[dk[j]][0]] = sub1[d[dk[j]][0]] + i[j] * 0.1
+            sub1[d[dk[j]][1]] = sub1[d[dk[j]][1]] - i[j] * 0.1
+
+        # We recursively call this function, passing in our ready-to-be-sorted
+        # new perturbed matching sequence.
+        # As we iterate, we build a list of all possible permutations
+        # associated with our original matching sequence.
+        curr.extend(gen_perm(sub1))
+
+
+    return curr
+```
+
+## Examples
+
+(Note that these examples may not actually be realizable matching sequences. We
+only care that the permutations are generated as we would expect.)
+
+```{python}
+seq = [1, 7, 9, 6, 2]
+perms = gen_perm(seq)
+for perm in perms:
+    print(perm)
+```
+
+Next, we try a sequence that has two associated permutations.
+
+```{python}
+seq = [1, 4, 6, 4, 1]
+perms = gen_perm(seq)
+for perm in perms:
+    print(perm)
+```
+
+Finally, we try a sequence that has four associated permutations.
+
+```{python}
+seq = [1, 3, 10, 22, 49, 22, 3]
+perms = gen_perm(seq)
+for perm in perms:
+    print(perm)
+```
 \doclicenseThis
