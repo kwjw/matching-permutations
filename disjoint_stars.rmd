@@ -47,7 +47,7 @@ the matching sequence with $m_0 = 1$, $m_1 = 3$, $m_2 = 3$, and $m_3 = 1$.
 
 For this project, matching permutations are represented as ordered $n$-tuples in
 Python, following the "one-line notation" discussed in the paper. A (somewhat
-redundant) example: the 5-tuple `(1, 4, 2, 3)` corresponds to the permutation
+redundant) example: the 4-tuple `(1, 4, 2, 3)` corresponds to the permutation
 1423.
 
 ## Star Forests
