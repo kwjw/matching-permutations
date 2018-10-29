@@ -30,8 +30,8 @@ output:
 
 Disclaimer: the code in this document probably works, but it is liable to be
 ugly, overcomplicated, and/or hard to follow. Improvements and corrections are
-welcome. You can submit an issue or pull request on this project's
-[Github page][project-github-page].
+welcome. You can submit an issue or pull request on this project's [Github
+page][project-github-page].
 
 The R code below allows for Python code to be written, executed, and displayed
 within this document, which was compiled using the `rmarkdown` package.
@@ -64,20 +64,19 @@ the matching sequence with $m_0 = 1$, $m_1 = 3$, $m_2 = 3$, and $m_3 = 1$.
 
 ## Matching Permutations
 
-For this project, matching permutations are represented as ordered $n$-tuples in
-Python, following the "one-line notation" discussed in the paper. A (somewhat
-redundant) example: the 4-tuple `(1, 4, 2, 3)` corresponds to the permutation
-1423.
+For this project, matching permutations are represented as ordered $n$-tuples
+in Python, following the "one-line notation" discussed in the paper. A
+(somewhat redundant) example: the 4-tuple `(1, 4, 2, 3)` corresponds to the
+permutation 1423.
 
 ## Constellations
 
 A constellation (i.e. a graph that is the union of disjoint stars) can be
 uniquely defined by a multiset of integers, with each integer $m$ in the
 multiset corresponding to a star with $m$ edges. For this project,
-constellations
-are represented as Python arrays. Of course, arrays do not behave like
-multisets, since arrays are indexed. This is not a problem, though, since our
-method of iteration over constellations avoids double counting.
+constellations are represented as Python arrays. Of course, arrays do not
+behave like multisets, since arrays are indexed. This is not a problem, though,
+since our method of iteration over constellations avoids double counting.
 
 # Converting Matching Sequences to Matching Permutations
 
@@ -239,8 +238,8 @@ for perm in perms:
 ## Code
 
 ```{python}
-# Given a constellation (stell), this function returns its matching sequence in the
-# format that is used as input for gen_perm.
+# Given a constellation (stell), this function returns its matching sequence in
+# the format that is used as input for gen_perm.
 #
 # stell is expressed as an array of the form [s_1, s_2, ..., s_n], where s_k is
 # the number of edges on the k-th star. In the context of graphs and matchings,
@@ -297,16 +296,16 @@ print(seq)
 We would like to count the matching permutations realizable by the family of
 constellations with matching number $n$. As of yet, we have not shown that
 checking any particular finite subset of this family yields all realizable
-permutations. So for now, we iterate over all constellations with matching number
-$n$ such that each constituent star has at most $n$ edges, and we obtain a
-lower bound.
+permutations. So for now, we iterate over all constellations with matching
+number $n$ such that each constituent star has at most $n$ edges, and we obtain
+a lower bound.
 
 ## Code
 
 ```{python}
 # Given matching number n, this function returns an array containing all star
-# forests that match the above description. The constellations in the output are
-# expressed in the form that stars_match accepts.
+# forests that match the above description. The constellations in the output
+# are expressed in the form that stars_match accepts.
 def iter_stars(n):
     stars = []
     # We use the method sometimes called "stars and bars" to iterate over all
