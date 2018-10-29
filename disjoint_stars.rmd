@@ -1,11 +1,23 @@
 ---
 title: Computing Matching Permutations of Star Forests
-author: Kyle Weingartner
+author:
+- Taylor Ball
+- David Galvin
+- Katie Hyry
+- Kyle Weingartner
 header-includes:
-    - \usepackage[type={CC},modifier={by-sa},version={3.0}]{doclicense}
+    - \usepackage[type={CC},modifier={by-sa},version={4.0}]{doclicense}
 output:
     pdf_document
 ---
+
+
+<!--
+  This source code is licensed under a Creative Commons "Attribution
+  -ShareAlike 4.0 International" license.
+-->
+
+\tableofcontents
 
 # Remarks and Initial Code
 
