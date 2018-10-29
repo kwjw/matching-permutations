@@ -11,6 +11,7 @@ output:
     pdf_document
 ---
 
+[project-github-page]: https://www.github.com/kyleweingartner/matching-permutations
 
 <!--
   This source code is licensed under a Creative Commons "Attribution
@@ -29,8 +30,8 @@ output:
 
 Disclaimer: the code in this document probably works, but it is liable to be
 ugly, overcomplicated, and/or hard to follow. Improvements and corrections are
-welcome. You can submit an issue or pull request on this project's Github page
-(TODO).
+welcome. You can submit an issue or pull request on this project's
+[Github page][project-github-page].
 
 The R code below allows for Python code to be written, executed, and displayed
 within this document, which was compiled using the `rmarkdown` package.
