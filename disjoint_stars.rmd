@@ -17,7 +17,13 @@ output:
   -ShareAlike 4.0 International" license.
 -->
 
-\tableofcontents
+
+
+<!--
+  Note that the time it takes to compile this document depends largely on the
+  amount of computation within it. To decrease the compilation time, lower
+  certain values in the code; for example, set n_max to 6 instead of 10.
+-->
 
 # Remarks and Initial Code
 
@@ -226,4 +232,158 @@ perms = gen_perm(seq)
 for perm in perms:
     print(perm)
 ```
+# Generating Matching Seuqences of Star Forests
+
+## Code
+
+```{python}
+# Given a star forest (sf), this function returns its matching sequence in the
+# format that is used as input for gen_perm.
+#
+# sf is expressed as an array of the form [s_1, s_2, ..., s_n], where s_k is
+# the number of edges on the k-th star. In the context of graphs and matchings,
+# the order of these numbers does not matter. Note that all entries must be
+# positive natural numbers.
+
+def stars_match(sf):
+    ms = []
+    # Iterate over all possible matching sizes.
+    for i in range(len(sf) + 1):
+
+        # m_i is the sum over the product (s_k_1)(s_k_2)...(s_k_i)
+        # for all distinct combinations of k_1, k_2, ... k_i
+        # (This could probably be worded better)
+        m = 0
+        for comb in itertools.combinations(range(len(sf)), i):
+            m = m + functools.reduce(mul, [sf[index] for index in comb], 1)
+        ms.append(m)
+    return ms
+```
+
+## Examples
+
+First, we try some well-understood star forests.
+
+```{python}
+sf = [1, 1, 1]
+seq = stars_match(sf)
+print(seq)
+```
+
+```{python}
+sf = [1, 1, 1, 1, 1, 1]
+seq = stars_match(sf)
+print(seq)
+perms = gen_perm(seq)
+for perm in perms:
+    print(perm)
+```
+
+Next, we test that isomorphic graphs give identical matching sequences.
+
+```{python}
+sf = [3, 1, 4, 1, 5, 9]
+seq = stars_match(sf)
+print(seq)
+sf = [9, 5, 4, 3, 1, 1]
+seq = stars_match(sf)
+print(seq)
+```
+
+# Iterating over a Certain Family of Star Forests
+
+We would like to count the matching permutations realizable by the family of
+star forests with matching number $n$. As of yet, we have not shown that
+checking any particular finite subset of this family yields all realizable
+permutations. So for now, we iterate over all star forests with matching number
+$n$ such that each constituent star has at most $n$ edges, and we obtain a
+lower bound.
+
+## Code
+
+```{python}
+# Given matching number n, this function returns an array containing all star
+# forests that match the above description. The star forests in the output are
+# expressed in the form that stars_match accepts.
+def iter_stars(n):
+    stars = []
+    # We use the method sometimes called "stars and bars" to iterate over all
+    # n-tuples of non-negative integers [c_1, c_2, ..., c_n]
+    # such that c_1 + c_2 + ... + c_n = n. (These are represented as arrays,
+    # not tuples, in the code. This does not change the result.)
+    # There is a natural bijection between this set of n-tuples and the family
+    # of star forests we are interested in: interpret c_k as the number of
+    # components that have k edges.
+    for comb in itertools.combinations(range(n + n - 1), n - 1):
+        star = [comb[0]]
+        for i in range(1, len(comb)):
+            star.append(comb[i] - comb[i - 1] - 1)
+        star.append(n + (n - 1) - comb[len(comb) - 1] - 1)
+        # We convert our n-tuple [c_1, ..., c_n] to a graph, expressed in the
+        # form [s_1, ..., s_n], that can be passed into stars_match.
+        ls = []
+        for i in range(len(star)):
+            ls.append([i + 1] * star[i])
+        stars.append(tuple(itertools.chain.from_iterable(ls)))
+    return stars
+```
+
+## Examples
+
+```{python}
+sf_list = iter_stars(2)
+for sf in sf_list:
+    print(sf)
+```
+
+```{python}
+sf_list = iter_stars(3)
+for sf in sf_list:
+    print(sf)
+```
+
+# Counting Distinct Matching Permutations
+
+We compose the functions that we have made so far.
+
+```{python}
+sf_list = iter_stars(3)
+for sf in sf_list:
+    print("sf:", sf)
+    perms = gen_perm(stars_match(sf))
+    for perm in perms:
+        print("perm:", perm)
+```
+
+We create a set of permutations realized through this iteration.
+
+```{python}
+sf_list = iter_stars(3)
+all_perms = set()
+for sf in sf_list:
+    perms = gen_perm(stars_match(sf))
+    for perm in perms:
+        all_perms.add(perm)
+for perm in all_perms:
+    print(perm)
+```
+
+We iterate over small values of $n$ and count the unique permutations.
+
+```{python}
+n_max = 8
+for n in range(2, n_max):
+    sf_list = iter_stars(n)
+    all_perms = set()
+    for sf in sf_list:
+        perms = gen_perm(stars_match(sf))
+        for perm in perms:
+            all_perms.add(perm)
+    print(len(all_perms))
+```
+
+We have obtained the first few terms of a sequence that can be interpreted as a
+lower bound of the number of realizable matching permutations of size $n$.
+Unfortunately, this sequence does not appear on OEIS.
+
 \doclicenseThis
