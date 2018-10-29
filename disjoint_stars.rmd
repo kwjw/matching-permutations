@@ -28,10 +28,9 @@ output:
 
 # Remarks and Initial Code
 
-Disclaimer: the code in this document probably works, but it is liable to be
-ugly, overcomplicated, and/or hard to follow. Improvements and corrections are
-welcome. You can submit an issue or pull request on this project's [Github
-page][project-github-page].
+Note: The code in this document was not written with time efficiency in mind.
+Improvements and corrections are welcome. Issues and pull requests can be made
+at this project's [Github page][project-github-page].
 
 The R code below allows for Python code to be written, executed, and displayed
 within this document, which was compiled using the `rmarkdown` package.
