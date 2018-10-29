@@ -6,4 +6,4 @@ Dependencies:
   - `reticulate`, an R package
 
 Compile using shell:
-  - `echo "require(rmarkdown); render($file')" | R --vanilla`
+  - `echo "require(rmarkdown); render('disjoint_stars.rmd')" | R --vanilla`
