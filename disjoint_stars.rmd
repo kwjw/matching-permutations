@@ -1,5 +1,5 @@
 ---
-title: Computing Matching Permutations of Star Forests
+title: Computing Matching Permutations of Constellations
 author:
 - Taylor Ball
 - David Galvin
@@ -69,14 +69,15 @@ Python, following the "one-line notation" discussed in the paper. A (somewhat
 redundant) example: the 4-tuple `(1, 4, 2, 3)` corresponds to the permutation
 1423.
 
-## Star Forests
+## Constellations
 
-A star forest (i.e. a graph that is the union of disjoint stars) can be
+A constellation (i.e. a graph that is the union of disjoint stars) can be
 uniquely defined by a multiset of integers, with each integer $m$ in the
-multiset corresponding to a star with $m$ edges. For this project, star forests
+multiset corresponding to a star with $m$ edges. For this project,
+constellations
 are represented as Python arrays. Of course, arrays do not behave like
 multisets, since arrays are indexed. This is not a problem, though, since our
-method of iteration over star forests avoids double counting.
+method of iteration over constellations avoids double counting.
 
 # Converting Matching Sequences to Matching Permutations
 
@@ -168,7 +169,7 @@ def gen_perm(seq):
     #
     # As an example, suppose our matching sequence is [8, 10, 12, 10, 8, 3]
     # as above. Then we iterate over all order pairs of the form
-    # (+- 1, +/- 1).
+    # (+/- 1, +/- 1).
     for i in s:
 
         # Yet again, make a temporary copy of the matching sequence
@@ -233,47 +234,47 @@ perms = gen_perm(seq)
 for perm in perms:
     print(perm)
 ```
-# Generating Matching Seuqences of Star Forests
+# Generating Matching Seuqences of Constellations
 
 ## Code
 
 ```{python}
-# Given a star forest (sf), this function returns its matching sequence in the
+# Given a constellation (stell), this function returns its matching sequence in the
 # format that is used as input for gen_perm.
 #
-# sf is expressed as an array of the form [s_1, s_2, ..., s_n], where s_k is
+# stell is expressed as an array of the form [s_1, s_2, ..., s_n], where s_k is
 # the number of edges on the k-th star. In the context of graphs and matchings,
 # the order of these numbers does not matter. Note that all entries must be
 # positive natural numbers.
 
-def stars_match(sf):
+def stars_match(stell):
     ms = []
     # Iterate over all possible matching sizes.
-    for i in range(len(sf) + 1):
+    for i in range(len(stell) + 1):
 
         # m_i is the sum over the product (s_k_1)(s_k_2)...(s_k_i)
         # for all distinct combinations of k_1, k_2, ... k_i
         # (This could probably be worded better)
         m = 0
-        for comb in itertools.combinations(range(len(sf)), i):
-            m = m + functools.reduce(mul, [sf[index] for index in comb], 1)
+        for comb in itertools.combinations(range(len(stell)), i):
+            m = m + functools.reduce(mul, [stell[index] for index in comb], 1)
         ms.append(m)
     return ms
 ```
 
 ## Examples
 
-First, we try some well-understood star forests.
+First, we try some well-understood constellations.
 
 ```{python}
-sf = [1, 1, 1]
-seq = stars_match(sf)
+stell = [1, 1, 1]
+seq = stars_match(stell)
 print(seq)
 ```
 
 ```{python}
-sf = [1, 1, 1, 1, 1, 1]
-seq = stars_match(sf)
+stell = [1, 1, 1, 1, 1, 1]
+seq = stars_match(stell)
 print(seq)
 perms = gen_perm(seq)
 for perm in perms:
@@ -283,20 +284,20 @@ for perm in perms:
 Next, we test that isomorphic graphs give identical matching sequences.
 
 ```{python}
-sf = [3, 1, 4, 1, 5, 9]
-seq = stars_match(sf)
+stell = [3, 1, 4, 1, 5, 9]
+seq = stars_match(stell)
 print(seq)
-sf = [9, 5, 4, 3, 1, 1]
-seq = stars_match(sf)
+stell = [9, 5, 4, 3, 1, 1]
+seq = stars_match(stell)
 print(seq)
 ```
 
-# Iterating over a Certain Family of Star Forests
+# Iterating over a Certain Family of Constellations
 
 We would like to count the matching permutations realizable by the family of
-star forests with matching number $n$. As of yet, we have not shown that
+constellations with matching number $n$. As of yet, we have not shown that
 checking any particular finite subset of this family yields all realizable
-permutations. So for now, we iterate over all star forests with matching number
+permutations. So for now, we iterate over all constellations with matching number
 $n$ such that each constituent star has at most $n$ edges, and we obtain a
 lower bound.
 
@@ -304,7 +305,7 @@ lower bound.
 
 ```{python}
 # Given matching number n, this function returns an array containing all star
-# forests that match the above description. The star forests in the output are
+# forests that match the above description. The constellations in the output are
 # expressed in the form that stars_match accepts.
 def iter_stars(n):
     stars = []
@@ -313,7 +314,7 @@ def iter_stars(n):
     # such that c_1 + c_2 + ... + c_n = n. (These are represented as arrays,
     # not tuples, in the code. This does not change the result.)
     # There is a natural bijection between this set of n-tuples and the family
-    # of star forests we are interested in: interpret c_k as the number of
+    # of constellations we are interested in: interpret c_k as the number of
     # components that have k edges.
     for comb in itertools.combinations(range(n + n - 1), n - 1):
         star = [comb[0]]
@@ -332,15 +333,15 @@ def iter_stars(n):
 ## Examples
 
 ```{python}
-sf_list = iter_stars(2)
-for sf in sf_list:
-    print(sf)
+stell_list = iter_stars(2)
+for stell in stell_list:
+    print(stell)
 ```
 
 ```{python}
-sf_list = iter_stars(3)
-for sf in sf_list:
-    print(sf)
+stell_list = iter_stars(3)
+for stell in stell_list:
+    print(stell)
 ```
 
 # Counting Distinct Matching Permutations
@@ -348,10 +349,10 @@ for sf in sf_list:
 We compose the functions that we have made so far.
 
 ```{python}
-sf_list = iter_stars(3)
-for sf in sf_list:
-    print("sf:", sf)
-    perms = gen_perm(stars_match(sf))
+stell_list = iter_stars(3)
+for stell in stell_list:
+    print("stell:", stell)
+    perms = gen_perm(stars_match(stell))
     for perm in perms:
         print("perm:", perm)
 ```
@@ -359,10 +360,10 @@ for sf in sf_list:
 We create a set of permutations realized through this iteration.
 
 ```{python}
-sf_list = iter_stars(3)
+stell_list = iter_stars(3)
 all_perms = set()
-for sf in sf_list:
-    perms = gen_perm(stars_match(sf))
+for stell in stell_list:
+    perms = gen_perm(stars_match(stell))
     for perm in perms:
         all_perms.add(perm)
 for perm in all_perms:
@@ -374,10 +375,10 @@ We iterate over small values of $n$ and count the unique permutations.
 ```{python}
 n_max = 8
 for n in range(2, n_max):
-    sf_list = iter_stars(n)
+    stell_list = iter_stars(n)
     all_perms = set()
-    for sf in sf_list:
-        perms = gen_perm(stars_match(sf))
+    for stell in stell_list:
+        perms = gen_perm(stars_match(stell))
         for perm in perms:
             all_perms.add(perm)
     print(len(all_perms))
